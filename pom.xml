@@ -24,11 +24,15 @@
   </properties>
   <dependencies>
 
+    <!-- Driver JDBC do MySQL -->
+    <!-- https://mvnrepository.com/artifact/postgresql/postgresql -->
+    <!-- https://mvnrepository.com/artifact/postgresql/postgresql -->
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate</artifactId>
-      <version>3.6.0.Beta2</version>
+        <groupId>postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>9.1-901-1.jdbc4</version>
     </dependency>
+
 
 
     <dependency>
