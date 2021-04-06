@@ -29,12 +29,12 @@ public class CommitPropertiesStudy implements Study{
             new RepositoryMining()
             .in(GitRemoteRepository.hostedOn(project.getRepo_url())
                 .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
-                .asBareRepos()
+                //.asBareRepos()
                 .buildAsSCMRepository())
             .through(Commits.list(project.getCommits_sha()))
             .visitorsAreThreadSafe(true)
             .visitorsChangeRepoState(false)
-            .withThreads(70)
+            .withThreads(20)
             .process(new CommitsVisitor())//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
             .mine();
         
