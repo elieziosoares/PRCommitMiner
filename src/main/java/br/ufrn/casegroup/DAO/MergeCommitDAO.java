@@ -1,6 +1,8 @@
+
 package br.ufrn.casegroup.DAO;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,16 +11,16 @@ import java.util.List;
 
 import br.ufrn.casegroup.Domain.Commit;
 
-public class CommitDAO extends AbsCommitDAO{
+public class MergeCommitDAO extends AbsCommitDAO{
     private Connection conn;
 
-    public CommitDAO() {
+    public MergeCommitDAO() {
         this.conn = ConnectionFactory.getConnection();
     }
 
     public List<Commit> getCommitsToMine(String project_name){
         List<Commit> commits = new ArrayList<Commit>();
-        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
         try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
         {
@@ -46,11 +48,11 @@ public class CommitDAO extends AbsCommitDAO{
             }
         }
         return commits;      
-   }
+    }
 
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
-        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
         try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
         {
@@ -80,7 +82,7 @@ public class CommitDAO extends AbsCommitDAO{
     }
 
     public void updateCommit(Commit commit) {
-        String updateCommit = "UPDATE COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? WHERE COMMIT_SHA LIKE ?";
+        String updateCommit = "UPDATE MERGE_COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? COMMIT_DATE = ?, MSG = ?, IN_MAIN_BRANCH = ? WHERE COMMIT_SHA LIKE ?";
         
         try(PreparedStatement stm = this.conn.prepareStatement(updateCommit);)
         {
@@ -94,6 +96,11 @@ public class CommitDAO extends AbsCommitDAO{
             stm.setInt(8, commit.getFiles());
             stm.setInt(9, commit.getTest_files());
             stm.setString(10, commit.getSha());
+
+            stm.setDate(11, (Date) commit.getDate());
+            stm.setString(12, commit.getMsg());
+            //stm.setInt(13, commit.getAuthor_id());
+            stm.setBoolean(13, commit.isMainBranch());
 
             stm.executeUpdate();
             stm.close();

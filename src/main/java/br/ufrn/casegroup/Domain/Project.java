@@ -3,6 +3,7 @@ package br.ufrn.casegroup.Domain;
 import java.sql.SQLException;
 import java.util.List;
 
+import br.ufrn.casegroup.DAO.AbsCommitDAO;
 import br.ufrn.casegroup.DAO.CommitDAO;
 
 public class Project {
@@ -13,6 +14,8 @@ public class Project {
     private List<Commit> commits;
     private List<String> commits_sha;
     
+    AbsCommitDAO commitDAO;
+
     public Project() {}
     
     
@@ -21,12 +24,10 @@ public class Project {
         this.setRepo_url(repo_url);
     }
 
-    public List<String> getCommits_sha() {
-       
-        if(this.commits == null){
-            CommitDAO commitDAO = new CommitDAO();
+    public List<String> getCommits_sha(AbsCommitDAO commitDAO) {
+        this.commitDAO = commitDAO;
+        if(this.commits == null)
             setCommits_sha(commitDAO.getCommitsToMine_sha(this.repo_name));
-        }
         
         return this.commits_sha;
     }
@@ -34,11 +35,10 @@ public class Project {
     public void setCommits_sha(List<String> commits_sha) {
         this.commits_sha = commits_sha;
     }
-    public List<Commit> getCommits() {
-        if(this.commits == null){
-            CommitDAO commitDAO = new CommitDAO();
+    public List<Commit> getCommits(AbsCommitDAO commitDAO) {
+        this.commitDAO = commitDAO;
+        if(this.commits == null)
             setCommits(commitDAO.getCommitsToMine(this.repo_name));
-        }
         
         return this.commits;
     }

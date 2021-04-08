@@ -63,6 +63,9 @@ public class CommitsVisitor implements CommitVisitor{
 		commitobj.setFiles(files);
 		commitobj.setTestVolume(test_lines);
 
+		commitobj.setMsg(commit.getMsg());
+		//commitobj.setAuthor_id(commit.getAuthor().);
+
 		commitDAO.updateCommit(commitobj);
 		System.out.println("\n   ..."+ commitobj.toString());
 	}

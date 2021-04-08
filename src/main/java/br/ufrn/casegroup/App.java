@@ -8,6 +8,8 @@ public final class App{
 
     public static void main(String[] args) {
         System.out.println("=== === === === Initializing mining with RepoDriller === === === ===");
-        new RepoDriller().start(new CommitPropertiesStudy());
+        //new RepoDriller().start(new CommitPropertiesStudy());
+        new RepoDriller().start(new MergeCommitsPropertiesStudy());
+
     }
 }
