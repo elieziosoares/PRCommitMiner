@@ -37,7 +37,7 @@ public class CommitPropertiesStudy implements Study{
             .visitorsAreThreadSafe(true)
             .visitorsChangeRepoState(false)
             .withThreads(20)
-            .process(new CommitsVisitor())//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
+            .process(new CommitsVisitor(new CommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
             .mine();
         
             project.setCommits_sha(null);

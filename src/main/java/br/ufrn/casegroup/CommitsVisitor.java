@@ -14,17 +14,23 @@ import org.repodriller.persistence.PersistenceMechanism;
 import org.repodriller.scm.CommitVisitor;
 import org.repodriller.scm.SCMRepository;
 
+import br.ufrn.casegroup.DAO.AbsCommitDAO;
 import br.ufrn.casegroup.DAO.CommitDAO;
+import br.ufrn.casegroup.DAO.MergeCommitDAO;
 
 
 public class CommitsVisitor implements CommitVisitor{
+	AbsCommitDAO commitDAO;
 
-    @Override
+    public CommitsVisitor(AbsCommitDAO commitDAO) {
+		this.commitDAO = commitDAO;
+	}
+
+	@Override
 	public void process(SCMRepository repo, Commit commit, PersistenceMechanism writer) {
 		System.out.println("+ Visiting commit "+commit.getHash());
 
 		br.ufrn.casegroup.Domain.Commit commitobj = new br.ufrn.casegroup.Domain.Commit(commit.getHash());
-		CommitDAO commitDAO = new CommitDAO();
 
 		int added = 0;
 		int removed = 0;

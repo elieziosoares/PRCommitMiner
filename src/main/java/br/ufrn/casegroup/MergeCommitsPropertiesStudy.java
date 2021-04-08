@@ -34,7 +34,7 @@ public class MergeCommitsPropertiesStudy implements Study{
             .visitorsAreThreadSafe(true)
             .visitorsChangeRepoState(false)
             .withThreads(20)
-            .process(new CommitsVisitor())//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
+            .process(new CommitsVisitor(new MergeCommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
             .mine();
         
             project.setCommits_sha(null);

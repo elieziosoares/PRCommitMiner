@@ -22,8 +22,13 @@ public class MergeCommitDAO extends AbsCommitDAO{
         List<Commit> commits = new ArrayList<Commit>();
         String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
+            
             stm.setString(0, project_name);
 
             ResultSet rs = stm.executeQuery();
@@ -54,8 +59,12 @@ public class MergeCommitDAO extends AbsCommitDAO{
         List<String> commits = new ArrayList<String>();
         String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
             stm.setString(1, project_name);
 
             ResultSet rs = stm.executeQuery();
@@ -82,25 +91,26 @@ public class MergeCommitDAO extends AbsCommitDAO{
     }
 
     public void updateCommit(Commit commit) {
-        String updateCommit = "UPDATE MERGE_COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? COMMIT_DATE = ?, MSG = ?, IN_MAIN_BRANCH = ? WHERE COMMIT_SHA LIKE ?";
+        String updateCommit = "UPDATE MERGE_COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ?, COMMIT_DATE = ?, MSG = ? WHERE COMMIT_SHA LIKE ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(updateCommit);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(updateCommit);
+
             stm.setInt(1, commit.getSize());
             stm.setInt(2, commit.getTestVolume());
             stm.setBoolean(3,commit.isMainBranch());
-            stm.setBoolean(4, commit.isMerge());
-            stm.setInt(5, commit.getDeletions());
-            stm.setInt(6, commit.getInsertions());
-            stm.setInt(7, commit.getLines());
-            stm.setInt(8, commit.getFiles());
-            stm.setInt(9, commit.getTest_files());
-            stm.setString(10, commit.getSha());
-
-            stm.setDate(11, (Date) commit.getDate());
-            stm.setString(12, commit.getMsg());
-            //stm.setInt(13, commit.getAuthor_id());
-            stm.setBoolean(13, commit.isMainBranch());
+            stm.setInt(4, commit.getDeletions());
+            stm.setInt(5, commit.getInsertions());
+            stm.setInt(6, commit.getLines());
+            stm.setInt(7, commit.getFiles());
+            stm.setInt(8, commit.getTest_files());
+            stm.setDate(9, new java.sql.Date(commit.getDate().getTime()));
+            stm.setString(10, commit.getMsg());
+            stm.setString(11, commit.getSha());
 
             stm.executeUpdate();
             stm.close();

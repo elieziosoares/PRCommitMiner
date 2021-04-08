@@ -20,8 +20,13 @@ public class CommitDAO extends AbsCommitDAO{
         List<Commit> commits = new ArrayList<Commit>();
         String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
+            
             stm.setString(0, project_name);
 
             ResultSet rs = stm.executeQuery();
@@ -52,8 +57,13 @@ public class CommitDAO extends AbsCommitDAO{
         List<String> commits = new ArrayList<String>();
         String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(selectCommits);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
+
             stm.setString(1, project_name);
 
             ResultSet rs = stm.executeQuery();
@@ -82,8 +92,13 @@ public class CommitDAO extends AbsCommitDAO{
     public void updateCommit(Commit commit) {
         String updateCommit = "UPDATE COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? WHERE COMMIT_SHA LIKE ?";
         
-        try(PreparedStatement stm = this.conn.prepareStatement(updateCommit);)
+        try
         {
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(updateCommit);
+
             stm.setInt(1, commit.getSize());
             stm.setInt(2, commit.getTestVolume());
             stm.setBoolean(3,commit.isMainBranch());
