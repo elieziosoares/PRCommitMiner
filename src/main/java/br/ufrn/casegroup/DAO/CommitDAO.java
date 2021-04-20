@@ -55,7 +55,7 @@ public class CommitDAO extends AbsCommitDAO{
 
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
-        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE and P.project_name like ?";
         
         try
         {

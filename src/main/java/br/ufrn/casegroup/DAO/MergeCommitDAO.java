@@ -57,7 +57,8 @@ public class MergeCommitDAO extends AbsCommitDAO{
 
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
-        String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
+        //String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE P.project_name like ?";
         
         try
         {
@@ -92,7 +93,7 @@ public class MergeCommitDAO extends AbsCommitDAO{
 
     public void updateCommit(Commit commit) {
         String updateCommit = "UPDATE MERGE_COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ?, COMMIT_DATE = ?, MSG = ? WHERE COMMIT_SHA LIKE ?";
-        
+        System.out.println(" ¨¨¨Updating commit " + commit.getSha());
         try
         {
             if (conn.isClosed())
@@ -118,12 +119,17 @@ public class MergeCommitDAO extends AbsCommitDAO{
         } catch(SQLException e) {
             if( this.conn != null){
                 try {
-                    System.err.print("updateCommit - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
+                    System.err.print("updateCommit - Transaction was not well succeeded. - Exception: " +e.getMessage());
                     conn.close();
+                    Thread.sleep(1000);
+                    System.out.println("¨¨¨ retry same commit after error: " + commit.getSha());
+                    updateCommit(commit);
                 } catch (SQLException excep) {
                     System.err.print("updateCommit - Connection close fail.");
                     System.err.print(excep.getMessage());
+                } catch (InterruptedException e2) {
+                    System.err.print("updateCommit - Sleep to retry failure.");
+                    System.err.print(e2.getMessage());
                 }
             }
         }

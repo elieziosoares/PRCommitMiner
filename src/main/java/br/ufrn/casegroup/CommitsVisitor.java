@@ -50,13 +50,13 @@ public class CommitsVisitor implements CommitVisitor{
 			if(isTestFile(m.getFileName())){
 				test_files++;
 				test_lines += m.getAdded()+m.getRemoved();
-				try {
+				/*try {
 					Writer arquivo = new BufferedWriter(new FileWriter("/home/elieziosoares/Doutorado/Causalidade/data.txt", true));
 					arquivo.append("\n"+m.getFileName());
 					arquivo.close();
 				}catch (IOException e) {
 					System.err.println("Writing test file error.");
-				}
+				}*/
 			}			
 		}
 
@@ -68,6 +68,7 @@ public class CommitsVisitor implements CommitVisitor{
 		commitobj.setSize(commit_size);
 		commitobj.setFiles(files);
 		commitobj.setTestVolume(test_lines);
+		commitobj.setTest_files(test_files);
 
 		commitobj.setMsg(commit.getMsg());
 		//commitobj.setAuthor_id(commit.getAuthor().);

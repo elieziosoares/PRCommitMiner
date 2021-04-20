@@ -1,5 +1,7 @@
 package br.ufrn.casegroup;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.repodriller.RepositoryMining;
@@ -15,6 +17,8 @@ public class MergeCommitsPropertiesStudy implements Study{
 
     private ProjectDAO projectDAO;
     List<Project> projects;
+    
+    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");     
 
     @Override
     public void execute() {
@@ -22,7 +26,8 @@ public class MergeCommitsPropertiesStudy implements Study{
         projects = projectDAO.getProjects();
 
         for (Project project : projects) {
-            System.out.println("\n===============================================================================");
+
+            System.out.println("\n===============================================================================\n" + dtf.format(LocalDateTime.now()));
             System.out.println(String.format("### Projeto: %s \t\t- URL: %s  ", project.getRepo_name(),project.getRepo_url()));
         
             new RepositoryMining()
@@ -39,7 +44,7 @@ public class MergeCommitsPropertiesStudy implements Study{
         
             project.setCommits_sha(null);
             projectDAO.updateProject_setMined(project);
-            System.out.println("Mining of project" +project.getRepo_name()+ " finished.");
+            System.out.println(dtf.format(LocalDateTime.now()) + " - Mining of project" +project.getRepo_name()+ " finished.");
         }
 
     }

@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 
 import br.ufrn.casegroup.DAO.AbsCommitDAO;
-import br.ufrn.casegroup.DAO.CommitDAO;
 
 public class Project {
     private String repo_name;
