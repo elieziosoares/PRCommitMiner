@@ -55,7 +55,7 @@ public class CommitDAO extends AbsCommitDAO{
 
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
-        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE and P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE P.project_name like ?;";
         
         try
         {
@@ -90,7 +90,7 @@ public class CommitDAO extends AbsCommitDAO{
     }
 
     public void updateCommit(Commit commit) {
-        String updateCommit = "UPDATE COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? WHERE COMMIT_SHA LIKE ?";
+        String updateCommit = "UPDATE COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, MERGE = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ? WHERE COMMIT_SHA LIKE ?";
         
         try
         {
@@ -101,14 +101,13 @@ public class CommitDAO extends AbsCommitDAO{
 
             stm.setInt(1, commit.getSize());
             stm.setInt(2, commit.getTestVolume());
-            stm.setBoolean(3,commit.isMainBranch());
-            stm.setBoolean(4, commit.isMerge());
-            stm.setInt(5, commit.getDeletions());
-            stm.setInt(6, commit.getInsertions());
-            stm.setInt(7, commit.getLines());
-            stm.setInt(8, commit.getFiles());
-            stm.setInt(9, commit.getTest_files());
-            stm.setString(10, commit.getSha());
+            stm.setBoolean(3, commit.isMerge());
+            stm.setInt(4, commit.getDeletions());
+            stm.setInt(5, commit.getInsertions());
+            stm.setInt(6, commit.getLines());
+            stm.setInt(7, commit.getFiles());
+            stm.setInt(8, commit.getTest_files());
+            stm.setString(9, commit.getSha());
 
             stm.executeUpdate();
             stm.close();

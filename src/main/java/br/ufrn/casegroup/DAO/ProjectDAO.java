@@ -18,8 +18,9 @@ public class ProjectDAO {
 
     public List<Project> getProjects(){
         List<Project> projects = new ArrayList<Project>();
-        String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = FALSE AND IGNORE = FALSE;";
-        //String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = TRUE";
+        //String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = FALSE AND IGNORE = FALSE;";
+        String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = TRUE";
+        //String selectProjects = "SELECT * FROM PROJECTS WHERE REPO_NAME IN (SELECT DISTINCT P.PROJECT_NAME FROM PULLREQUESTS P WHERE P.TEST_FILES =0 AND P.TEST_VOLUME > 0);";
         
         try(PreparedStatement stm = this.conn.prepareStatement(selectProjects);)
         {
