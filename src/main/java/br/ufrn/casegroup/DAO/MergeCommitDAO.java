@@ -14,8 +14,9 @@ import br.ufrn.casegroup.Domain.Commit;
 public class MergeCommitDAO extends AbsCommitDAO{
     private Connection conn;
 
-    public MergeCommitDAO() {
-        this.conn = ConnectionFactory.getConnection();
+    public MergeCommitDAO() throws SQLException {
+        //this.conn = ConnectionFactory.getConnection();
+        this.conn = DBCPDataSource.getConnection();
     }
 
     public List<Commit> getCommitsToMine(String project_name){
@@ -38,19 +39,11 @@ public class MergeCommitDAO extends AbsCommitDAO{
             }
 
             rs.close();
-            stm.close();
-            conn.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("getCommitsToMine - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("getCommitsToMine - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("getCommitsToMine - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
         return commits;      
     }
@@ -58,7 +51,8 @@ public class MergeCommitDAO extends AbsCommitDAO{
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
         //String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
-        String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE P.project_name like ?";
+        //String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE P.project_name like ?";
+        String selectCommits = "select merge_commit_sha from PULLREQUESTS WHERE COMMITS > 0 AND COMMIT_SIZE IS NULL AND merge_commit_sha IS NOT NULL AND PROJECT_NAME like ?";
         
         try
         {
@@ -70,23 +64,15 @@ public class MergeCommitDAO extends AbsCommitDAO{
 
             ResultSet rs = stm.executeQuery();
             while(rs.next()){
-                commits.add(rs.getString("commit_sha"));
+                commits.add(rs.getString("merge_commit_sha"));
             }
 
             rs.close();
-            stm.close();
-            conn.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("getCommitsToMine_sha - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("getCommitsToMine_sha - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("getCommitsToMine_sha - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
         return commits;  
     }
@@ -114,25 +100,19 @@ public class MergeCommitDAO extends AbsCommitDAO{
             stm.setString(11, commit.getSha());
 
             stm.executeUpdate();
-            stm.close();
-            conn.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("updateCommit - Transaction was not well succeeded. - Exception: " +e.getMessage());
-                    conn.close();
-                    Thread.sleep(1000);
-                    System.out.println("¨¨¨ retry same commit after error: " + commit.getSha());
-                    updateCommit(commit);
-                } catch (SQLException excep) {
-                    System.err.print("updateCommit - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                } catch (InterruptedException e2) {
-                    System.err.print("updateCommit - Sleep to retry failure.");
-                    System.err.print(e2.getMessage());
-                }
+            try {
+                System.err.println("updateCommit - Transaction was not well succeeded. - Exception: " +e.getMessage());
+                Thread.sleep(1000);
+                System.out.println("¨¨¨ retry same commit after error: " + commit.getSha());
+                updateCommit(commit);
+            } catch (InterruptedException e2) {
+                System.err.print(e2.getMessage());
             }
         }
     }
+
     
 }

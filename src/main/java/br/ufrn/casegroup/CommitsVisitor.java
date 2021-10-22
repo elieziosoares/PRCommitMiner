@@ -45,6 +45,7 @@ public class CommitsVisitor implements CommitVisitor{
 			files ++;
 			added += m.getAdded();
 			removed += m.getRemoved();
+			
 			commit_size += m.getAdded()+m.getRemoved();
 
 			if(isTestFile(m.getFileName())){
@@ -75,6 +76,12 @@ public class CommitsVisitor implements CommitVisitor{
 
 		commitDAO.updateCommit(commitobj);
 		System.out.println("\n   ..."+ commitobj.toString());
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private boolean isTestFile(String file) {

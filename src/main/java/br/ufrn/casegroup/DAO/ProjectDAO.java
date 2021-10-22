@@ -12,15 +12,14 @@ import br.ufrn.casegroup.Domain.Project;
 public class ProjectDAO {
     private Connection conn;
 
-    public ProjectDAO() {
-        this.conn = ConnectionFactory.getConnection();
+    public ProjectDAO() throws SQLException {
+        //this.conn = ConnectionFactory.getConnection();
+        this.conn = DBCPDataSource.getConnection();
     }
 
     public List<Project> getProjects(){
-        List<Project> projects = new ArrayList<Project>();
-        //String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = FALSE AND IGNORE = FALSE;";
-        String selectProjects = "SELECT * FROM PROJECTS WHERE MINED = TRUE";
-        //String selectProjects = "SELECT * FROM PROJECTS WHERE REPO_NAME IN (SELECT DISTINCT P.PROJECT_NAME FROM PULLREQUESTS P WHERE P.TEST_FILES =0 AND P.TEST_VOLUME > 0);";
+        List<Project> projects = new ArrayList<Project>();        
+        String selectProjects = "SELECT * FROM PROJECTS WHERE commits_mined is TRUE and comments_mined is TRUE;";//" and commits_mined2 is not True";
         
         try(PreparedStatement stm = this.conn.prepareStatement(selectProjects);)
         {
@@ -31,49 +30,76 @@ public class ProjectDAO {
             }
 
             rs.close();
-            stm.close();
-            conn.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-
-            if( this.conn != null){
-                try {
-                    System.err.print("getProjects - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("getProjects - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("getProjects - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
         return projects;       
    }
 
-   public void updateProject_setMined(Project project) {
-    String updateCommit = "UPDATE PROJECTS SET MINED = TRUE WHERE repo_name LIKE ?";
-
-    
-    try{
-        if (conn.isClosed())
-            this.conn = ConnectionFactory.getConnection();    
+   public List<Project> getProjectsToMergeCommits(){
+        List<Project> projects = new ArrayList<Project>();        
+        String selectProjects = "SELECT * FROM PROJECTS WHERE commits_mined2 is True and merge_commits_mined is False";
         
-        PreparedStatement stm = this.conn.prepareStatement(updateCommit);
-        stm.setString(1, project.getRepo_name());
-
-        stm.executeUpdate();
-        stm.close();
-        conn.close();
-    } catch(SQLException e) {
-        if( this.conn != null){
-            try {
-                System.err.print("updateProject_setMined - Transaction was not well succeeded.");
-                System.err.print(e.getMessage());
-                conn.close();
-            } catch (SQLException excep) {
-                System.err.print("updateProject_setMined - Connection close fail.");
-                System.err.print(excep.getMessage());
+        try(PreparedStatement stm = this.conn.prepareStatement(selectProjects);)
+        {
+            ResultSet rs = stm.executeQuery();
+            while(rs.next()){
+                Project proj = new Project(rs.getString("repo_name"),rs.getString("repo_url"));   
+                projects.add(proj);
             }
+
+            rs.close();
+            //stm.close();
+            //conn.close();
+        } catch(SQLException e) {
+            System.err.print("getProjects - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
+        }
+        return projects;       
+    }
+
+    public void updateProject_setMined(Project project) {
+        String updateCommit = "UPDATE PROJECTS SET commits_mined2 = TRUE WHERE repo_name LIKE ?";
+
+        
+        try{
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(updateCommit);
+            stm.setString(1, project.getRepo_name());
+
+            stm.executeUpdate();
+            //stm.close();
+            //conn.close();
+        } catch(SQLException e) {
+            System.err.print("updateProject_setMined - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
+        }
+    }
+
+    public void updateProject_setMinedMerge(Project project) {
+        String updateCommit = "UPDATE PROJECTS SET merge_commits_mined = TRUE WHERE repo_name LIKE ?";
+    
+        
+        try{
+            if (conn.isClosed())
+                this.conn = ConnectionFactory.getConnection();    
+            
+            PreparedStatement stm = this.conn.prepareStatement(updateCommit);
+            stm.setString(1, project.getRepo_name());
+    
+            stm.executeUpdate();
+            //stm.close();
+            //conn.close();
+        } catch(SQLException e) {
+            System.err.print("updateProject_setMined - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
     }
 }
-}
+
+

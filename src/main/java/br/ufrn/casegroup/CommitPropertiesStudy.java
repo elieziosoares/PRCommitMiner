@@ -3,8 +3,10 @@ package br.ufrn.casegroup;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 
 import org.apache.logging.log4j.core.util.FileUtils;
+
 import org.repodriller.RepositoryMining;
 import org.repodriller.Study;
 import org.repodriller.filter.range.Commits;
@@ -21,28 +23,47 @@ public class CommitPropertiesStudy implements Study{
 
     @Override
     public void execute() {
-        projectDAO = new ProjectDAO();
-        projects = projectDAO.getProjects();
+        try {
+            projectDAO = new ProjectDAO();
+            projects = projectDAO.getProjects();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+            return;
+        }
 
         for (Project project : projects) {
+            //if(project.getRepo_name().equals("rhomobile/rhodes"))
+               // continue;
             System.out.println("\n===============================================================================");
             System.out.println(String.format("### Projeto: %s \t\t- URL: %s  ", project.getRepo_name(),project.getRepo_url()));
         
-            new RepositoryMining()
-            .in(GitRemoteRepository.hostedOn(project.getRepo_url())
-                .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
-                //.asBareRepos()
-                .buildAsSCMRepository())
-            .through(Commits.list(project.getCommits_sha(new CommitDAO())))
-            .visitorsAreThreadSafe(true)
-            .visitorsChangeRepoState(false)
-            .withThreads(20)
-            .process(new CommitsVisitor(new CommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
-            .mine();
+            try {
+                new RepositoryMining()
+                .in(GitRemoteRepository.hostedOn(project.getRepo_url())
+                    .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
+                    //.asBareRepos()
+                    .buildAsSCMRepository())
+                .through(Commits.list(project.getCommits_sha(new CommitDAO())))
+                .visitorsAreThreadSafe(true)
+                .visitorsChangeRepoState(false)
+                .withThreads(20)
+                .process(new CommitsVisitor(new CommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
+                .mine();
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+                return;
+            }
         
             project.setCommits_sha(null);
             projectDAO.updateProject_setMined(project);
             System.out.println("Mining of project" +project.getRepo_name()+ " finished.");
+
+            try {
+                org.apache.commons.io.FileUtils.deleteDirectory(new File("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name()));
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
 
        /* try {

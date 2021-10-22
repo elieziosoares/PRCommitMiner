@@ -12,8 +12,9 @@ import br.ufrn.casegroup.Domain.Commit;
 public class CommitDAO extends AbsCommitDAO{
     private Connection conn;
 
-    public CommitDAO() {
-        this.conn = ConnectionFactory.getConnection();
+    public CommitDAO() throws SQLException {
+        //this.conn = ConnectionFactory.getConnection();
+        this.conn = DBCPDataSource.getConnection();
     }
 
     public List<Commit> getCommitsToMine(String project_name){
@@ -35,28 +36,20 @@ public class CommitDAO extends AbsCommitDAO{
                 commits.add(commit);
             }
 
-            rs.close();
-            stm.close();
-            conn.close();
+            //rs.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("getCommitsToMine - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("getCommitsToMine - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("getCommitsToMine - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
         return commits;      
    }
 
     public List<String> getCommitsToMine_sha(String project_name){
         List<String> commits = new ArrayList<String>();
-        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE P.project_name like ?;";
-        
+        //String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha WHERE P.project_name like ?";
+        String selectCommits = "SELECT C.commit_sha FROM commits C INNER JOIN commit_PR P ON C.commit_sha = P.commit_sha INNER JOIN PULLREQUESTS PR ON P.pr_number = PR.pr_number AND P.project_name = PR.project_name WHERE P.project_name like ? and C.commit_size is null and PR.inPeriodRQ1 is true;";
         try
         {
             if (conn.isClosed())
@@ -71,20 +64,12 @@ public class CommitDAO extends AbsCommitDAO{
                 commits.add(rs.getString("commit_sha"));
             }
 
-            rs.close();
-            stm.close();
-            conn.close();
+            //rs.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("getCommitsToMine_sha - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("getCommitsToMine_sha - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("getCommitsToMine_sha - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
         return commits;  
     }
@@ -110,19 +95,11 @@ public class CommitDAO extends AbsCommitDAO{
             stm.setString(9, commit.getSha());
 
             stm.executeUpdate();
-            stm.close();
-            conn.close();
+            //stm.close();
+            //conn.close();
         } catch(SQLException e) {
-            if( this.conn != null){
-                try {
-                    System.err.print("updateCommit - Transaction was not well succeeded.");
-                    System.err.print(e.getMessage());
-                    conn.close();
-                } catch (SQLException excep) {
-                    System.err.print("updateCommit - Connection close fail.");
-                    System.err.print(excep.getMessage());
-                }
-            }
+            System.err.print("updateCommit - Transaction was not well succeeded.");
+            System.err.print(e.getMessage());
         }
     }
     

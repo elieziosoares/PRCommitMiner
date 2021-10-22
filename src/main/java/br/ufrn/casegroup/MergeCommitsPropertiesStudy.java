@@ -1,5 +1,6 @@
 package br.ufrn.casegroup;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -22,28 +23,39 @@ public class MergeCommitsPropertiesStudy implements Study{
 
     @Override
     public void execute() {
-        projectDAO = new ProjectDAO();
-        projects = projectDAO.getProjects();
+        try {
+            projectDAO = new ProjectDAO();
+            projects = projectDAO.getProjectsToMergeCommits();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
 
         for (Project project : projects) {
 
             System.out.println("\n===============================================================================\n" + dtf.format(LocalDateTime.now()));
             System.out.println(String.format("### Projeto: %s \t\t- URL: %s  ", project.getRepo_name(),project.getRepo_url()));
         
-            new RepositoryMining()
-            .in(GitRemoteRepository.hostedOn(project.getRepo_url())
-                .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
-                //.asBareRepos()
-                .buildAsSCMRepository())
-            .through(Commits.list(project.getCommits_sha(new MergeCommitDAO())))
-            .visitorsAreThreadSafe(true)
-            .visitorsChangeRepoState(false)
-            .withThreads(20)
-            .process(new CommitsVisitor(new MergeCommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
-            .mine();
+            try {
+                new RepositoryMining()
+                .in(GitRemoteRepository.hostedOn(project.getRepo_url())
+                    .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
+                    //.asBareRepos()
+                    .buildAsSCMRepository())
+                .through(Commits.list(project.getCommits_sha(new MergeCommitDAO())))
+                .visitorsAreThreadSafe(true)
+                .visitorsChangeRepoState(false)
+                .withThreads(20)
+                .process(new CommitsVisitor(new MergeCommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
+                .mine();
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return;
+            }
         
             project.setCommits_sha(null);
-            projectDAO.updateProject_setMined(project);
+            
+            projectDAO.updateProject_setMinedMerge(project);
             System.out.println(dtf.format(LocalDateTime.now()) + " - Mining of project" +project.getRepo_name()+ " finished.");
         }
 
