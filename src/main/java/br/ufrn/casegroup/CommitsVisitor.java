@@ -76,12 +76,11 @@ public class CommitsVisitor implements CommitVisitor{
 
 		commitDAO.updateCommit(commitobj);
 		System.out.println("\n   ..."+ commitobj.toString());
-		try {
+		/*try {
 			Thread.sleep(250);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			System.out.println(e.getMessage());
+		}*/
 	}
 
 	private boolean isTestFile(String file) {

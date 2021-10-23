@@ -10,6 +10,6 @@ public final class App{
         System.out.println("=== === === === Initializing mining with RepoDriller === === === ===");
         //new RepoDriller().start(new MergeCommitsPropertiesStudy());
         new RepoDriller().start(new CommitPropertiesStudy());
-
+        System.out.println("=== === === === Finish === === === ===");
     }
 }

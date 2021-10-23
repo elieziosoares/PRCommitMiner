@@ -14,25 +14,24 @@ import br.ufrn.casegroup.Domain.Commit;
 public class MergeCommitDAO extends AbsCommitDAO{
     private Connection conn;
 
-    public MergeCommitDAO() throws SQLException {
-        //this.conn = ConnectionFactory.getConnection();
-        this.conn = DBCPDataSource.getConnection();
-    }
+    public MergeCommitDAO(){}
 
     public List<Commit> getCommitsToMine(String project_name){
         List<Commit> commits = new ArrayList<Commit>();
         String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE C.commit_size is NULL and P.project_name like ?";
         
+        Connection conn = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
         try
         {
-            if (conn.isClosed())
-                this.conn = ConnectionFactory.getConnection();    
-            
-            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
+            conn = DBCPDataSource.getConnection();    
+            stm = conn.prepareStatement(selectCommits);
             
             stm.setString(0, project_name);
 
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while(rs.next()){
                 Commit commit = new Commit(rs.getString("commit_sha"));   
                 commits.add(commit);
@@ -44,6 +43,10 @@ public class MergeCommitDAO extends AbsCommitDAO{
         } catch(SQLException e) {
             System.err.print("getCommitsToMine - Transaction was not well succeeded.");
             System.err.print(e.getMessage());
+        }finally {
+            try { if (rs != null) rs.close(); } catch(Exception e) { }
+            try { if (stm != null) stm.close(); } catch(Exception e) { }
+            try { if (conn != null) conn.close(); } catch(Exception e) { }
         }
         return commits;      
     }
@@ -54,15 +57,17 @@ public class MergeCommitDAO extends AbsCommitDAO{
         //String selectCommits = "SELECT C.commit_sha FROM merge_commits C INNER JOIN pullrequests P ON C.commit_sha = P.merge_commit_sha WHERE P.project_name like ?";
         String selectCommits = "select merge_commit_sha from PULLREQUESTS WHERE COMMITS > 0 AND COMMIT_SIZE IS NULL AND merge_commit_sha IS NOT NULL AND PROJECT_NAME like ?";
         
+        Connection conn = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
         try
         {
-            if (conn.isClosed())
-                this.conn = ConnectionFactory.getConnection();    
-            
-            PreparedStatement stm = this.conn.prepareStatement(selectCommits);
+            conn = DBCPDataSource.getConnection();    
+            stm = conn.prepareStatement(selectCommits);
             stm.setString(1, project_name);
 
-            ResultSet rs = stm.executeQuery();
+            rs = stm.executeQuery();
             while(rs.next()){
                 commits.add(rs.getString("merge_commit_sha"));
             }
@@ -73,6 +78,10 @@ public class MergeCommitDAO extends AbsCommitDAO{
         } catch(SQLException e) {
             System.err.print("getCommitsToMine_sha - Transaction was not well succeeded.");
             System.err.print(e.getMessage());
+        }finally {
+            try { if (rs != null) rs.close(); } catch(Exception e) { }
+            try { if (stm != null) stm.close(); } catch(Exception e) { }
+            try { if (conn != null) conn.close(); } catch(Exception e) { }
         }
         return commits;  
     }
@@ -80,12 +89,15 @@ public class MergeCommitDAO extends AbsCommitDAO{
     public void updateCommit(Commit commit) {
         String updateCommit = "UPDATE MERGE_COMMITS SET COMMIT_SIZE = ?, TEST_VOLUME = ?, IN_MAIN_BRANCH = ?, DELETIONS = ?, INSERTIONS = ?, LINES = ?, FILES = ?, TEST_FILES = ?, COMMIT_DATE = ?, MSG = ? WHERE COMMIT_SHA LIKE ?";
         System.out.println(" ¨¨¨Updating commit " + commit.getSha());
+        
+        Connection conn = null;
+        PreparedStatement stm = null;
+        ResultSet rs = null;
+
         try
         {
-            if (conn.isClosed())
-                this.conn = ConnectionFactory.getConnection();    
-            
-            PreparedStatement stm = this.conn.prepareStatement(updateCommit);
+            conn = DBCPDataSource.getConnection();    
+            stm = conn.prepareStatement(updateCommit);
 
             stm.setInt(1, commit.getSize());
             stm.setInt(2, commit.getTestVolume());
@@ -111,6 +123,10 @@ public class MergeCommitDAO extends AbsCommitDAO{
             } catch (InterruptedException e2) {
                 System.err.print(e2.getMessage());
             }
+        }finally {
+            try { if (rs != null) rs.close(); } catch(Exception e) { }
+            try { if (stm != null) stm.close(); } catch(Exception e) { }
+            try { if (conn != null) conn.close(); } catch(Exception e) { }
         }
     }
 

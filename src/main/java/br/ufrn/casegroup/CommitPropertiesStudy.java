@@ -23,13 +23,10 @@ public class CommitPropertiesStudy implements Study{
 
     @Override
     public void execute() {
-        try {
-            projectDAO = new ProjectDAO();
-            projects = projectDAO.getProjects();
-        } catch (SQLException e1) {
-            e1.printStackTrace();
-            return;
-        }
+        
+        projectDAO = new ProjectDAO();
+        projects = projectDAO.getProjects();
+        
 
         for (Project project : projects) {
             //if(project.getRepo_name().equals("rhomobile/rhodes"))
@@ -37,22 +34,17 @@ public class CommitPropertiesStudy implements Study{
             System.out.println("\n===============================================================================");
             System.out.println(String.format("### Projeto: %s \t\t- URL: %s  ", project.getRepo_name(),project.getRepo_url()));
         
-            try {
-                new RepositoryMining()
-                .in(GitRemoteRepository.hostedOn(project.getRepo_url())
-                    .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
-                    //.asBareRepos()
-                    .buildAsSCMRepository())
-                .through(Commits.list(project.getCommits_sha(new CommitDAO())))
-                .visitorsAreThreadSafe(true)
-                .visitorsChangeRepoState(false)
-                .withThreads(20)
-                .process(new CommitsVisitor(new CommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
-                .mine();
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-                return;
-            }
+            new RepositoryMining()
+            .in(GitRemoteRepository.hostedOn(project.getRepo_url())
+                .inTempDir("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name())
+                //.asBareRepos()
+                .buildAsSCMRepository())
+            .through(Commits.list(project.getCommits_sha(new CommitDAO())))
+            .visitorsAreThreadSafe(true)
+            .visitorsChangeRepoState(false)
+            .withThreads(20)
+            .process(new CommitsVisitor(new CommitDAO()))//, new CSVFile("/home/elieziosoares/Doutorado/Causalidade/data.csv"))
+            .mine();
         
             project.setCommits_sha(null);
             projectDAO.updateProject_setMined(project);
@@ -61,7 +53,6 @@ public class CommitPropertiesStudy implements Study{
             try {
                 org.apache.commons.io.FileUtils.deleteDirectory(new File("/home/elieziosoares/Doutorado/Causalidade/StudyRepos/"+project.getRepo_name()));
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
